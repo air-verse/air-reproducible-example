@@ -5,20 +5,11 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  # entrypoint = "dlv"
-  # args_bin = [
-  #   "exec",
-  #   "--accept-multiclient",
-  #   "--log",
-  #   "--headless",
-  #   "--continue",
-  #   "--listen=:8999",
-  #   "--api-version", "2",
-  #   "./tmp/main",
-  # ]
-  entrypoint = "./tmp/main"
+  args_bin = []
+  bin = ""
   cmd = "go build -o ./tmp/main ."
   delay = 1000
+  entrypoint = ["./tmp/main"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
