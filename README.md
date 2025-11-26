@@ -8,7 +8,7 @@ This repo collects minimal projects that reproduce bugs when running apps with [
 - Hit the route noted below; stop with `Ctrl+C` when you are done.
 
 ## Current samples
-- `air-proxy-timeout-reproduction/`: Delays startup by one second so Air's proxy on `:8888` times out while the app comes up on `:7777` (reproduces air-verse/air#732).
+- `air-proxy-timeout/`: Delays startup by one second so Air's proxy on `:8888` times out while the app comes up on `:7777` (reproduces air-verse/air#732).
 - `"with space"/`: Gin app kept in a path containing a space to check watcher/build behavior; `air` serves `/ping` and `/index` on `:8080`.
 - `with-template/`: Gin app rendering templates (LoadHTMLGlob) with a couple nested packages to see how template changes are picked up; `air` serves `/ping` and `/index` on `:8080`.
 
