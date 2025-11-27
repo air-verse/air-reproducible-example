@@ -5,17 +5,18 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  cmd = "go build -o ./tmp/main ."
-  delay = 1000
-  entrypoint = ["./tmp/main"]
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
-  exclude_file = []
-  exclude_regex = ["_test.go"]
-  exclude_unchanged = false
+  args_bin = []
+  bin = "/tmp/main"
+  cmd = "go build -o /tmp/main main.go"
+  delay = 500
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "docker", "bin", "data", ".git", "node_modules", "docs", "cmd/tools"]
+  exclude_file = ["*.md", "*.txt", "*.log", "*.sql", "docker-compose*.yml", "Dockerfile*"]
+  exclude_regex = ["_test\\.go$", "\\.git.*", ".*\\.swp$", ".*\\.tmp$"]
+  exclude_unchanged = true
   follow_symlink = false
   full_bin = ""
   include_dir = []
-  include_ext = ["*"]
+  include_ext = ["go", "tpl", "tmpl", "html"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"

@@ -1,0 +1,12 @@
+services:
+  server:
+    image: cosmtrek/air:v1.63.3
+    container_name: controlme-server
+    working_dir: /workdir
+    volumes:
+      - ./:/workdir
+    environment:
+       - GB_TYPE=sqlite
+
+    restart: unless-stopped
+
