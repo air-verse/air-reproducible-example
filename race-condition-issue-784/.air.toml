@@ -1,0 +1,48 @@
+# Air configuration for reproducing issue #784
+# https://github.com/air-verse/air/issues/784
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # CRITICAL: The sleep command extends build time to ~10 seconds
+  # This is necessary to create a time window where Build B can be triggered
+  # while Build A is still running, exposing the race condition
+  # NOTE: Sleep AFTER go build but BEFORE "Build complete" to ensure:
+  #   1. Source files are read immediately (Build A gets old helper.go)
+  #   2. Build process takes 10 seconds (time for Build B to be triggered)
+  # NOTE: -ldflags injects the REAL compile time (not startup time) into BuildTime variable
+  cmd = "echo '🔨 Build started at' $(date +%H:%M:%S.%3N) && go build -ldflags \"-X 'main.BuildTime=$(date +%H:%M:%S.%3N)'\" -o ./tmp/main . && sleep 10 && echo '✅ Build complete at' $(date +%H:%M:%S.%3N)"
+  
+  # Delay before starting build after file change
+  delay = 1000
+  
+  # Binary to run
+  entrypoint = ["./tmp/main"]
+  
+  # Directories to exclude from watching
+  exclude_dir = ["tmp", "vendor"]
+  
+  # Don't skip unchanged files (we want every change to trigger a build)
+  exclude_unchanged = false
+  
+  # Watch Go files
+  include_ext = ["go"]
+  
+  # Don't stop on errors (so we can see the race condition clearly)
+  stop_on_error = false
+  
+[log]
+  # Show timestamps in logs
+  time = true
+  
+[color]
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[screen]
+  # Don't clear screen to see all build logs
+  clear_on_rebuild = false
+  keep_scroll = true
