@@ -1,36 +1,47 @@
 
   __    _   ___  
  / /\  | | | |_) 
-/_/--\ |_| |_| \_ v1.63.5-0.20260101153728-68494d454bd5+dirty, built with Go go1.25.4
+/_/--\ |_| |_| \_ v1.63.5-0.20251230120433-5d760bb5754e, built with Go go1.25.4
 
-[22:27:21] mkdir /home/neo/project/air-reproducible-example/race-condition-issue-784/tmp
-[22:27:21] watching .
-[22:27:21] !exclude tmp
-[22:27:21] building...
-🔨 Build started at 22:27:21.776
-✅ Build complete at 22:27:32.153
-[22:27:32] running...
+[22:49:09] mkdir /home/neo/project/air-reproducible-example/race-condition-issue-784/tmp
+[22:49:09] watching .
+[22:49:09] !exclude tmp
+[22:49:09] building...
+🔨 Build started at 22:49:09.441
+✅ Build complete at 22:49:19.721
+[22:49:19] running...
 ========================================
 🚀 Server started
-📅 BUILD TIME: 22:27:21.777
+📅 BUILD TIME: 22:49:09.442
 📦 HELPER VERSION: v1.0.0
 ========================================
-2026/01/04 22:27:32 Server listening on :8080
-2026/01/04 22:27:32 Try: curl http://localhost:8080/version
-[22:27:35] main.go has changed
-[22:27:35] building...
-🔨 Build started at 22:27:35.880
-[22:27:37] helper.go has changed
-✅ Build complete at 22:27:46.177
-[22:27:46] running...
+2026/01/04 22:49:19 Server listening on :8080
+2026/01/04 22:49:19 Try: curl http://localhost:8080/version
+[22:49:23] main.go has changed
+[22:49:23] building...
+🔨 Build started at 22:49:23.548
+[22:49:25] helper.go has changed
+[22:49:25] building...
+🔨 Build started at 22:49:25.562
+✅ Build complete at 22:49:33.970
+[22:49:33] running...
 ========================================
 🚀 Server started
-📅 BUILD TIME: 22:27:35.881
-📦 HELPER VERSION: v1.0.0
+📅 BUILD TIME: 22:49:25.563
+📦 HELPER VERSION: v2.0.0-BUILD-B
 ========================================
-2026/01/04 22:27:46 Server listening on :8080
-2026/01/04 22:27:46 Try: curl http://localhost:8080/version
-2026/01/04 22:27:51 Version check - Build: 22:27:35.881, Helper: v1.0.0
-2026/01/04 22:27:51 Version check - Build: 22:27:35.881, Helper: v1.0.0
-[22:27:57] cleaning...
-[22:27:57] see you again~
+2026/01/04 22:49:33 Server listening on :8080
+2026/01/04 22:49:33 Try: curl http://localhost:8080/version
+✅ Build complete at 22:49:35.842
+[22:49:35] running...
+========================================
+🚀 Server started
+📅 BUILD TIME: 22:49:25.563
+📦 HELPER VERSION: v2.0.0-BUILD-B
+========================================
+2026/01/04 22:49:35 Server listening on :8080
+2026/01/04 22:49:35 Try: curl http://localhost:8080/version
+2026/01/04 22:49:39 Version check - Build: 22:49:25.563, Helper: v2.0.0-BUILD-B
+2026/01/04 22:49:39 Version check - Build: 22:49:25.563, Helper: v2.0.0-BUILD-B
+[22:51:06] cleaning...
+[22:51:06] see you again~
