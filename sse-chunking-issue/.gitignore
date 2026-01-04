@@ -1,0 +1,4 @@
+tmp/
+*.exe
+*.out
+go.sum

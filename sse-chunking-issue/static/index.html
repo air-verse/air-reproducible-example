@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Chunking Issue Demo - Air Issue #791</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        h1 {
+            color: #4ec9b0;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .panel {
+            flex: 1;
+            border: 1px solid #3e3e3e;
+            padding: 15px;
+            background: #252526;
+        }
+        .panel h2 {
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .direct h2 {
+            color: #4ec9b0;
+        }
+        .proxy h2 {
+            color: #ce9178;
+        }
+        .controls {
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            background: #0e639c;
+            border: none;
+            color: white;
+            font-family: monospace;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        button:disabled {
+            background: #3e3e3e;
+            cursor: not-allowed;
+        }
+        .stats {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #1e1e1e;
+            border: 1px solid #3e3e3e;
+        }
+        .stats div {
+            margin: 5px 0;
+        }
+        .events {
+            height: 400px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            border: 1px solid #3e3e3e;
+            padding: 10px;
+            font-size: 12px;
+        }
+        .event {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #4ec9b0;
+            background: #252526;
+        }
+        .event-time {
+            color: #608b4e;
+        }
+        .event-data {
+            color: #9cdcfe;
+        }
+        .event-delta {
+            color: #ce9178;
+            font-weight: bold;
+        }
+        .info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #252526;
+            border: 1px solid #3e3e3e;
+        }
+        .info a {
+            color: #4ec9b0;
+        }
+    </style>
+</head>
+<body>
+    <h1>SSE Chunking Issue Demo - Air Issue #791</h1>
+    
+    <div class="info">
+        <p><strong>Issue:</strong> Air's proxy buffers and repackages HTTP chunks instead of forwarding them immediately.</p>
+        <p><strong>Expected:</strong> Direct connection shows events arriving every 3 seconds (80-byte chunks).</p>
+        <p><strong>Actual:</strong> Proxy connection buffers events into larger chunks (512 bytes, then 2048 bytes), causing delays.</p>
+        <p><strong>GitHub Issue:</strong> <a href="https://github.com/air-verse/air/issues/791" target="_blank">air-verse/air#791</a></p>
+    </div>
+
+    <div class="container">
+        <div class="panel direct">
+            <h2>Direct Connection (Port 3002)</h2>
+            <div class="controls">
+                <button id="startDirect">Start</button>
+                <button id="stopDirect" disabled>Stop</button>
+            </div>
+            <div class="stats">
+                <div>Status: <span id="directStatus">Stopped</span></div>
+                <div>Events Received: <span id="directCount">0</span></div>
+                <div>Last Event: <span id="directLast">-</span></div>
+                <div>Avg Time Delta: <span id="directAvg">-</span></div>
+            </div>
+            <div class="events" id="directEvents"></div>
+        </div>
+
+        <div class="panel proxy">
+            <h2>Through Proxy (Port 3082)</h2>
+            <div class="controls">
+                <button id="startProxy">Start</button>
+                <button id="stopProxy" disabled>Stop</button>
+            </div>
+            <div class="stats">
+                <div>Status: <span id="proxyStatus">Stopped</span></div>
+                <div>Events Received: <span id="proxyCount">0</span></div>
+                <div>Last Event: <span id="proxyLast">-</span></div>
+                <div>Avg Time Delta: <span id="proxyAvg">-</span></div>
+            </div>
+            <div class="events" id="proxyEvents"></div>
+        </div>
+    </div>
+
+    <script>
+        class SSEConnection {
+            constructor(url, type) {
+                this.url = url;
+                this.type = type;
+                this.eventSource = null;
+                this.count = 0;
+                this.lastTimestamp = null;
+                this.deltas = [];
+                this.elements = {
+                    status: document.getElementById(`${type}Status`),
+                    count: document.getElementById(`${type}Count`),
+                    last: document.getElementById(`${type}Last`),
+                    avg: document.getElementById(`${type}Avg`),
+                    events: document.getElementById(`${type}Events`),
+                    startBtn: document.getElementById(`start${type.charAt(0).toUpperCase() + type.slice(1)}`),
+                    stopBtn: document.getElementById(`stop${type.charAt(0).toUpperCase() + type.slice(1)}`)
+                };
+                
+                this.elements.startBtn.addEventListener('click', () => this.start());
+                this.elements.stopBtn.addEventListener('click', () => this.stop());
+            }
+
+            start() {
+                if (this.eventSource) {
+                    return;
+                }
+
+                console.log(`[${this.type}] Starting connection to ${this.url}`);
+                this.elements.status.textContent = 'Connecting...';
+                this.elements.startBtn.disabled = true;
+                this.elements.stopBtn.disabled = false;
+                
+                this.eventSource = new EventSource(this.url);
+                
+                this.eventSource.addEventListener('datastar-patch-signals', (e) => {
+                    const now = new Date();
+                    const timestamp = now.toLocaleTimeString() + '.' + now.getMilliseconds().toString().padStart(3, '0');
+                    
+                    // Calculate delta
+                    let delta = '-';
+                    if (this.lastTimestamp) {
+                        const deltaMs = now - this.lastTimestamp;
+                        delta = (deltaMs / 1000).toFixed(3) + 's';
+                        this.deltas.push(deltaMs);
+                    }
+                    this.lastTimestamp = now;
+                    
+                    this.count++;
+                    this.elements.count.textContent = this.count;
+                    this.elements.last.textContent = timestamp;
+                    
+                    // Calculate average delta
+                    if (this.deltas.length > 0) {
+                        const avg = this.deltas.reduce((a, b) => a + b, 0) / this.deltas.length;
+                        this.elements.avg.textContent = (avg / 1000).toFixed(3) + 's';
+                    }
+                    
+                    // Parse data
+                    let data = e.data;
+                    try {
+                        const parsed = JSON.parse(data.replace('signals ', ''));
+                        data = JSON.stringify(parsed);
+                    } catch (err) {
+                        // Keep original data if parsing fails
+                    }
+                    
+                    // Add event to display
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = 'event';
+                    eventDiv.innerHTML = `
+                        <div class="event-time">[${timestamp}] Event #${this.count}</div>
+                        <div class="event-data">Data: ${data}</div>
+                        <div class="event-delta">Delta: ${delta}</div>
+                    `;
+                    
+                    this.elements.events.insertBefore(eventDiv, this.elements.events.firstChild);
+                    
+                    // Keep only last 50 events
+                    while (this.elements.events.children.length > 50) {
+                        this.elements.events.removeChild(this.elements.events.lastChild);
+                    }
+                    
+                    console.log(`[${this.type}] Event #${this.count}, Delta: ${delta}`);
+                });
+                
+                this.eventSource.onopen = () => {
+                    console.log(`[${this.type}] Connection opened`);
+                    this.elements.status.textContent = 'Connected';
+                };
+                
+                this.eventSource.onerror = (err) => {
+                    console.error(`[${this.type}] Connection error:`, err);
+                    this.elements.status.textContent = 'Error';
+                    this.stop();
+                };
+            }
+
+            stop() {
+                if (!this.eventSource) {
+                    return;
+                }
+
+                console.log(`[${this.type}] Stopping connection`);
+                this.eventSource.close();
+                this.eventSource = null;
+                this.elements.status.textContent = 'Stopped';
+                this.elements.startBtn.disabled = false;
+                this.elements.stopBtn.disabled = true;
+            }
+
+            reset() {
+                this.stop();
+                this.count = 0;
+                this.lastTimestamp = null;
+                this.deltas = [];
+                this.elements.count.textContent = '0';
+                this.elements.last.textContent = '-';
+                this.elements.avg.textContent = '-';
+                this.elements.events.innerHTML = '';
+            }
+        }
+
+        // Initialize connections
+        const directConnection = new SSEConnection('http://localhost:3002/sse', 'direct');
+        const proxyConnection = new SSEConnection('http://localhost:3082/sse', 'proxy');
+
+        console.log('SSE Chunking Issue Demo initialized');
+        console.log('Direct connection: http://localhost:3002/sse');
+        console.log('Proxy connection: http://localhost:3082/sse');
+    </script>
+</body>
+</html>

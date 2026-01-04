@@ -1,0 +1,11 @@
+[log]
+  time = true
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "tmp/main"
+
+[proxy]
+  enabled = true
+  proxy_port = 3082
+  app_port = 3002
