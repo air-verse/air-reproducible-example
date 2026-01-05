@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Proxy Reload Timing Issue #656</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .stat-value {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-ready {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        .status-loading {
+            background: #f59e0b;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .status-error {
+            background: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .timeline {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .timeline h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 16px;
+        }
+        
+        .timeline-entry {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .timeline-entry.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .timeline-entry.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .timeline-entry.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .instructions {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #78350f;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Air Proxy Reload Timing Issue #656</h1>
+            <p>Reproducing "Proxy handler: unable to reach app" on hot-reload</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <h2>Page Load Information</h2>
+                <div class="stat">
+                    <span class="stat-label">Reload Count</span>
+                    <span class="stat-value" id="reload-count">Loading...</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Page Loaded At</span>
+                    <span class="stat-value" id="load-time">Loading...</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Server Status</span>
+                    <span class="stat-value" id="server-status">
+                        <span class="status-indicator status-loading"></span>
+                        Checking...
+                    </span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h2>Server Health Data</h2>
+                <div class="stat">
+                    <span class="stat-label">Server Uptime</span>
+                    <span class="stat-value" id="uptime">-</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Startup Time</span>
+                    <span class="stat-value" id="startup-time">-</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Process PID</span>
+                    <span class="stat-value" id="pid">-</span>
+                </div>
+            </div>
+            
+            <div class="timeline" id="timeline-container">
+                <h3>Event Timeline</h3>
+                <div id="timeline"></div>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="button" onclick="location.reload()">Manual Reload</button>
+                <button class="button" onclick="checkHealth()" style="margin-left: 10px;">Check Server Health</button>
+            </div>
+            
+            <div class="instructions">
+                <h3>How to Reproduce the Issue:</h3>
+                <ol>
+                    <li>Make sure Air is running with <span class="code">air</span> command</li>
+                    <li>Access this page through the proxy at <span class="code">http://localhost:8081</span></li>
+                    <li>Edit <span class="code">main.go</span> (add a comment or change something)</li>
+                    <li>Save the file to trigger Air's hot reload</li>
+                    <li><strong>Observe:</strong> Browser will try to reload immediately, but server takes 2+ seconds to start</li>
+                    <li><strong>Result:</strong> You'll see "Proxy handler: unable to reach app" error</li>
+                    <li>Manual refresh is required after server is ready</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Track reload count using sessionStorage
+        let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0') + 1;
+        sessionStorage.setItem('reloadCount', reloadCount.toString());
+        
+        // Display reload count
+        document.getElementById('reload-count').textContent = reloadCount;
+        
+        // Display load time
+        const loadTime = new Date();
+        document.getElementById('load-time').textContent = loadTime.toLocaleTimeString() + '.' + loadTime.getMilliseconds().toString().padStart(3, '0');
+        
+        // Timeline
+        const timeline = [];
+        
+        function addTimelineEntry(message, type = 'info') {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString() + '.' + now.getMilliseconds().toString().padStart(3, '0');
+            timeline.push({ time: timeStr, message, type });
+            updateTimeline();
+        }
+        
+        function updateTimeline() {
+            const timelineEl = document.getElementById('timeline');
+            timelineEl.innerHTML = timeline.map(entry => 
+                `<div class="timeline-entry ${entry.type}">[${entry.time}] ${entry.message}</div>`
+            ).join('');
+            timelineEl.scrollTop = timelineEl.scrollHeight;
+        }
+        
+        // Add initial timeline entry
+        addTimelineEntry(`Page loaded (reload #${reloadCount})`, 'success');
+        
+        if (reloadCount > 1) {
+            addTimelineEntry(`This is reload #${reloadCount} - check if server was ready when you saw this load`, 'warning');
+        }
+        
+        // Check server health
+        async function checkHealth() {
+            addTimelineEntry('Checking server health...', 'info');
+            
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                // Update status
+                const statusEl = document.getElementById('server-status');
+                statusEl.innerHTML = '<span class="status-indicator status-ready"></span>Ready';
+                
+                // Update health data
+                document.getElementById('uptime').textContent = data.uptime_seconds.toFixed(3) + 's';
+                document.getElementById('startup-time').textContent = data.startup_seconds.toFixed(3) + 's';
+                document.getElementById('pid').textContent = data.pid;
+                
+                // Timeline entry
+                const startupMs = (data.startup_seconds * 1000).toFixed(0);
+                addTimelineEntry(`Server healthy! Startup took ${startupMs}ms`, 'success');
+                
+                // Warning if startup was slow
+                if (data.startup_seconds > 1.0) {
+                    addTimelineEntry(`⚠️ Server took ${startupMs}ms to start (Air proxy timeout is 1000ms)`, 'warning');
+                    addTimelineEntry(`This means browser reload happened ${startupMs - 1000}ms BEFORE server was ready!`, 'error');
+                }
+                
+            } catch (error) {
+                const statusEl = document.getElementById('server-status');
+                statusEl.innerHTML = '<span class="status-indicator status-error"></span>Error';
+                addTimelineEntry(`❌ Failed to reach server: ${error.message}`, 'error');
+                addTimelineEntry('This is the "unable to reach app" error!', 'error');
+            }
+        }
+        
+        // Auto-check health on load
+        checkHealth();
+        
+        // Periodic health check
+        setInterval(checkHealth, 5000);
+        
+        // Detect if we came from Air's auto-reload
+        if (performance.navigation.type === 1) {
+            addTimelineEntry('Page was reloaded (possibly by Air proxy)', 'warning');
+        }
+        
+        // Log when page becomes visible (in case it was hidden during reload)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                addTimelineEntry('Page became visible', 'info');
+            }
+        });
+    </script>
+</body>
+</html>
