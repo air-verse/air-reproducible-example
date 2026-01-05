@@ -1,7 +1,0 @@
-[log]
-  time = true
-
-[proxy]
-  enabled = true
-  proxy_port = 8888
-  app_port = 7777
