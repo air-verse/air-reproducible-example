@@ -1,0 +1,25 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "tmp/main"
+  delay = 0
+  exclude_dir = ["tmp"]
+  include_ext = ["go"]
+  exclude_unchanged = false
+  
+  # Key configuration to demonstrate the issue
+  send_interrupt = true
+  kill_delay = "3s"  # Set to 3 seconds to make the time waste observable
+  
+  stop_on_error = false
+
+[log]
+  time = true  # Show timestamps to measure delays
+
+[misc]
+  clean_on_exit = true
+
+[proxy]
+  enabled = false
