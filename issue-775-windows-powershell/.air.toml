@@ -1,0 +1,34 @@
+root = "."
+
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main.exe ."
+  bin = ".\\tmp\\main.exe"
+  full_bin = ".\\tmp\\main.exe"
+  delay = 1000
+  exclude_dir = ["tmp"]
+  exclude_file = []
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = false
+  follow_symlink = false
+  include_dir = []
+  include_ext = ["go"]
+  include_file = []
+  kill_delay = "0s"
+  log = "tmp/build-errors.log"
+  poll = true
+  poll_interval = 0
+  post_cmd = []
+  pre_cmd = []
+  rerun = false
+  rerun_delay = 500
+  send_interrupt = false
+  stop_on_error = false
+
+[log]
+  main_only = true
+  time = false
+
+[misc]
+  clean_on_exit = true
