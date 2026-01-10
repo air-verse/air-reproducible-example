@@ -1,0 +1,15 @@
+# Air will try to create this, demonstrating the bug
+/tmp/
+
+# Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output coverage
+*.out
