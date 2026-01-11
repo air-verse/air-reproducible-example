@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  bin = "./tmp/main"
+  include_ext = ["go"]
+  exclude_dir = ["tmp"]
+  # Use manual mode to disable automatic restarts on file changes
+  # Press 'r' key to trigger restart manually
+  watch_mode = "manual"
+
+[log]
+  time = true
