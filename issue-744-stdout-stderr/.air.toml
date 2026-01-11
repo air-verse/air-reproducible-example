@@ -1,0 +1,6 @@
+root = "."
+tmp_dir = "."
+
+[build]
+cmd = "go build main.go"
+bin = "main"
