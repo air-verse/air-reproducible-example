@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ."
+bin = "./tmp/main"
+include_ext = ["go"]
+exclude_dir = ["tmp", "node_modules"]
+delay = 1000
+# BUG: duplicate key causes TOML parse error
+# Air silently falls back to default config when running without -c flag
+delay = 2000
