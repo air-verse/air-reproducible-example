@@ -1,0 +1,32 @@
+services:
+  # Service WITHOUT TTY - Expected: hot reload may NOT work
+  app-no-tty:
+    build: .
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+    environment:
+      - PORT=3000
+
+  # Service WITH TTY - Expected: hot reload should work
+  app-with-tty:
+    build: .
+    tty: true
+    ports:
+      - "3002:3000"
+    volumes:
+      - .:/app
+    environment:
+      - PORT=3000
+
+  # Service WITHOUT TTY but with polling enabled
+  app-no-tty-poll:
+    build: .
+    ports:
+      - "3003:3000"
+    volumes:
+      - .:/app
+    environment:
+      - PORT=3000
+    command: air -c .air.poll.toml
