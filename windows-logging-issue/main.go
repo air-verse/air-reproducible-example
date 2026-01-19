@@ -17,7 +17,6 @@ func main() {
 	// Define a simple GET endpoint
 	r.GET("/", func(c *gin.Context) {
 		fmt.Println("Home page requested")
-		// Return JSON response
 		c.String(http.StatusOK, "Hello, World!")
 	})
 
