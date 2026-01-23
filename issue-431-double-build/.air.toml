@@ -1,0 +1,31 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Build command - creates executable in tmp directory
+  cmd = "go build -o ./tmp/main.exe ."
+  bin = "tmp/main.exe"
+  
+  # Watch settings
+  include_ext = ["go"]
+  exclude_dir = ["tmp"]
+  exclude_unchanged = false
+  
+  # CRITICAL: delay = 0 triggers the double-build bug on Windows
+  # The bug occurs because fsnotify on Windows may fire multiple events
+  # for a single file save, and without delay, each event triggers a build
+  delay = 0
+  
+  # WORKAROUND: Uncomment the line below to fix the issue
+  # delay = 10
+  
+  # Don't stop on error so we can see the full behavior
+  stop_on_error = false
+
+[log]
+  # Enable timestamps to help analyze timing issues
+  time = true
+
+[misc]
+  # Clean on exit for easier re-testing
+  clean_on_exit = true
