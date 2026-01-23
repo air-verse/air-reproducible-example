@@ -1,0 +1,4 @@
+[build]
+  cmd = "make build"
+  bin = "./tmp/main"
+  exclude_dir = ["tmp"]
