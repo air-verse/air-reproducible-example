@@ -10,6 +10,7 @@ This repo collects minimal projects that reproduce bugs when running apps with [
 ## Current samples
 - `air-proxy-timeout/`: Delays startup by one second so Air's proxy on `:8888` times out while the app comes up on `:7777` (reproduces air-verse/air#732).
 - `include-file-issue-545/`: Files in `include_file` are watched but don't trigger rebuilds unless their extension is also in `include_ext`; server on `:8080` (reproduces air-verse/air#545, fixed in v1.53.0+).
+- `ldflags-issue/`: Build command uses `-ldflags` to set version variables, but Air-run builds don't embed them; server on `:8080` (reproduces air-verse/air#513).
 - `issue-505-tmp-dir-nested/`: Air fails to create nested `tmp_dir` paths (e.g., `/tmp/air/nested/build`) because it uses `os.Mkdir()` instead of `os.MkdirAll()`; server on `:3000` (reproduces air-verse/air#505).
 - `proxy-reload-timing-issue-656/`: Browser reload triggered immediately when process starts, before app is ready to accept connections on `:8080`; Air's proxy on `:8081` shows "unable to reach app" error (reproduces air-verse/air#656).
 - `race-condition-issue-784/`: Race condition where Build B cancels itself when triggered during Build A, leaving outdated binary running (reproduces air-verse/air#784).
