@@ -1,0 +1,12 @@
+# Air temporary directory
+tmp/
+
+# Build output
+*.exe
+bin/
+
+# Test data
+testdata/
+
+# Build error log
+build-errors.log

@@ -16,6 +16,7 @@ This repo collects minimal projects that reproduce bugs when running apps with [
 - `race-condition-issue-784/`: Race condition where Build B cancels itself when triggered during Build A, leaving outdated binary running (reproduces air-verse/air#784).
 - `send-interrupt-delay-issue-671/`: When `send_interrupt = true`, Air always waits full `kill_delay` even if process exits gracefully in milliseconds, wasting ~1.9s per reload; server on `:9090` (reproduces air-verse/air#671).
 - `sse-chunking-issue/`: Air's proxy buffers and repackages Server-Sent Events into larger chunks instead of forwarding them immediately; direct on `:3002`, proxy on `:3082` (reproduces air-verse/air#791).
+- `windows-path-bug/`: **Windows-only:** Air fails to run binaries when path is provided via CLI flags with forward slashes (e.g., `--build.bin "bin/app.exe"`); config file works fine (reproduces air-verse/air#589).
 - `"with space"/`: Gin app kept in a path containing a space to check watcher/build behavior; `air` serves `/ping` and `/index` on `:8080`.
 - `with-template/`: Gin app rendering templates (LoadHTMLGlob) with a couple nested packages to see how template changes are picked up; `air` serves `/ping` and `/index` on `:8080`.
 

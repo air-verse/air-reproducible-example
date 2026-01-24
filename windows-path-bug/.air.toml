@@ -1,0 +1,29 @@
+#:schema https://json.schemastore.org/any.json
+
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  # This demonstrates that forward slashes work fine in config files
+  cmd = "make build"
+  bin = "bin/windows-path-bug.exe"
+  
+  include_ext = ["go", "mod"]
+  exclude_dir = ["tmp", "vendor", "testdata", "bin"]
+  delay = 1000
+
+[log]
+  time = false
+
+[color]
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  clean_on_exit = false
+
+[screen]
+  clear_on_rebuild = true
